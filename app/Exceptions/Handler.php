@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -41,10 +46,37 @@ class Handler extends ExceptionHandler
      *
      * @return void
      */
+
     public function register()
     {
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        if ($e instanceof ModelNotFoundException) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => $e->getMessage()
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($e instanceof NotFoundHttpException) {
+            return response()->json([
+                'status' => Response::HTTP_NOT_FOUND,
+                'message' => 'PAGE NOT FOUND'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        if ($e instanceof AuthenticationException) {
+            return response()->json([
+                'status' => Response::HTTP_UNAUTHORIZED,
+                'message' => 'Bạn chưa đăng nhập'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return parent::render($request, $e);
     }
 }
