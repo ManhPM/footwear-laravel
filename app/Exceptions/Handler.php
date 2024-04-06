@@ -74,7 +74,7 @@ class Handler extends ExceptionHandler
             return response()->json([
                 'status' => Response::HTTP_UNAUTHORIZED,
                 'message' => 'Bạn chưa đăng nhập'
-            ], Response::HTTP_NOT_FOUND);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         return parent::render($request, $e);

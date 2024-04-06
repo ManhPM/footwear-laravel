@@ -66,5 +66,9 @@ class Kernel extends HttpKernel
         'check.product.exist' => \App\Http\Middleware\CheckExistProduct::class,
         'check.coupon.exist' => \App\Http\Middleware\CheckExistCoupon::class,
         'check.pending.order' => \App\Http\Middleware\ValidateCheckout::class,
+        'authorize' => \App\Http\Middleware\Authorize::class,
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
     ];
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\CouponController;
+use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
@@ -34,11 +35,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('cart', [CartController::class, 'index']);
         Route::post('checkout', [CartController::class, 'processCheckout'])->middleware(['check.coupon.exist', 'check.pending.order']);
 
-        Route::resource('roles', RoleController::class);
+        // Route::resource('roles', RoleController::class)->middleware('permission:show-coupon');
+        Route::get('roles', [RoleController::class, 'index'])->middleware('permission:show-coupon');
         Route::resource('users', UserController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('products', ProductController::class);
         Route::resource('coupons', CouponController::class);
+
+        Route::get('/orders/confirm/{order_id}', [OrderController::class, 'confirmOrder']);
+        Route::get('/orders/cancel/{order_id}', [OrderController::class, 'cancelOrder'])->middleware(['role:employee']);
 
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
@@ -49,9 +54,6 @@ Route::prefix('v1')->group(function () {
     Route::get('categories/{category_id}', [CategoryController::class, 'getProductsByCategoryId']);
     Route::get('products/{product_id}', [ProductController::class, 'show']);
     Route::get('products/{product_id}', [AuthController::class, 'show']);
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        return $request->cookie();
-    });
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
 

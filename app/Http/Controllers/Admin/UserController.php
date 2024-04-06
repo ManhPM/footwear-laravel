@@ -48,7 +48,7 @@ class UserController extends Controller
         $dataCreate = $request->all();
         $dataCreate['password'] = Hash::make($request->password);
         $dataCreate['image'] = $this->user->saveImage($request);
-        $dataCreate['guard_name'] = 'web';
+        $dataCreate['guard_name'] = 'sanctum';
 
         $user = $this->user->create($dataCreate);
         $user->images()->create(['url' => $dataCreate['image']]);

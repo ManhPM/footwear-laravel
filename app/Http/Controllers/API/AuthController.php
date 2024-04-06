@@ -55,7 +55,7 @@ class AuthController extends Controller
     {
         $dataCreate = $request->all();
         $dataCreate['password'] = Hash::make($request->password);
-        $dataCreate['guard_name'] = 'web';
+        $dataCreate['guard_name'] = 'sanctum';
         if (isset($dataCreate['image'])) {
             $dataCreate['image'] = $this->user->saveImage($request);
         }

@@ -20,4 +20,9 @@ class Order extends Model
         'ship',
         'total',
     ];
+
+    public function products()
+    {
+        return $this->hasMany(ProductOrder::class, 'order_id');
+    }
 }

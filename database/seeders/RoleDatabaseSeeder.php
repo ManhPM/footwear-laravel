@@ -34,6 +34,14 @@ class RoleDatabaseSeeder extends Seeder
             Role::updateOrCreate($role);
         }
 
+        $superAdmin = User::whereEmail('admin@gmail.com')->first();
+
+        if (!$superAdmin) {
+            $superAdmin = User::factory()->create(['email' => 'admin@gmail.com']);
+        }
+        $superAdmin->assignRole('super-admin');
+
+
         $permissions = [
             ['name' => 'create-user', 'display_name' => 'Create user', 'group' => 'user'],
             ['name' => 'update-user', 'display_name' => 'Update user', 'group' => 'user'],
@@ -60,8 +68,8 @@ class RoleDatabaseSeeder extends Seeder
             ['name' => 'show-coupon', 'display_name' => 'Show coupon', 'group' => 'coupon'],
             ['name' => 'delete-coupon', 'display_name' => 'Delete coupon', 'group' => 'coupon'],
 
-            ['name' => 'list-order', 'display_name' => 'list order', 'group' => 'orders'],
-            ['name' => 'update-order-status', 'display_name' => 'Update order status', 'group' => 'orders'],
+            ['name' => 'cancel-order', 'display_name' => 'Cancel order', 'group' => 'orders'],
+            ['name' => 'confirm-order', 'display_name' => 'Confirm order', 'group' => 'orders'],
         ];
 
         foreach ($permissions as $item) {
