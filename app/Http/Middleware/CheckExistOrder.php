@@ -11,9 +11,10 @@ class CheckExistOrder
 {
     public function handle(Request $request, Closure $next)
     {
-        $order = Order::find($request->order_id);
-        if (!$order) {
+        $item = Order::find($request->route('id'));
+        if (!$item) {
             return response()->json([
+                $request,
                 'message' => 'Đơn không tồn tại'
             ], Response::HTTP_BAD_REQUEST);
         }

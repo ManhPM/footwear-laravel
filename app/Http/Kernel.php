@@ -65,10 +65,11 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'check.product.exist' => \App\Http\Middleware\CheckExistProduct::class,
         'check.coupon.exist' => \App\Http\Middleware\CheckExistCoupon::class,
+        'check.role.exist' => \App\Http\Middleware\CheckExistRole::class,
+        'check.category.exist' => \App\Http\Middleware\CheckExistCategory::class,
+        'check.order.exist' => \App\Http\Middleware\CheckExistOrder::class,
+        'check.user.exist' => \App\Http\Middleware\CheckExistUser::class,
         'check.pending.order' => \App\Http\Middleware\ValidateCheckout::class,
-        'authorize' => \App\Http\Middleware\Authorize::class,
-        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-        'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-        'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+        'permission' => \App\Http\Middleware\Authorize::class,
     ];
 }

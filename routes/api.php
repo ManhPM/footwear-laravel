@@ -42,8 +42,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::resource('products', ProductController::class);
         Route::resource('coupons', CouponController::class);
 
-        Route::get('/orders/confirm/{order_id}', [OrderController::class, 'confirmOrder']);
-        Route::get('/orders/cancel/{order_id}', [OrderController::class, 'cancelOrder'])->middleware(['role:employee']);
+        Route::get('/orders/confirm/{id}', [OrderController::class, 'confirmOrder'])->middleware(['permission:employee']);
+        Route::get('/orders/cancel/{id}', [OrderController::class, 'cancelOrder'])->middleware(['permission:employee']);
+        Route::get('/orders', [OrderController::class, 'index'])->middleware(['permission:employee']);
+        Route::get('/orders/detail/{id}', [OrderController::class, 'getDetailOrder'])->middleware(['check.order.exist']);
+        Route::get('/orders/cancel/{id}', [OrderController::class, 'cancelOrder'])->middleware(['permission:employee']);
 
         Route::get('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
@@ -51,9 +54,9 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 Route::prefix('v1')->group(function () {
-    Route::get('categories/{category_id}', [CategoryController::class, 'getProductsByCategoryId']);
-    Route::get('products/{product_id}', [ProductController::class, 'show']);
-    Route::get('products/{product_id}', [AuthController::class, 'show']);
+    Route::get('categories/{id}', [CategoryController::class, 'getProductsByCategoryId']);
+    Route::get('products/{id}', [ProductController::class, 'show']);
+    Route::get('products/{id}', [AuthController::class, 'show']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
 

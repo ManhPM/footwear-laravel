@@ -50,9 +50,10 @@ class OrderController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function getDetailOrder($id)
     {
-        //
+        $order = $this->order->with('products')->find($id);
+        return $this->sentSuccessResponse($order, '', Response::HTTP_OK);
     }
 
     /**
@@ -120,8 +121,5 @@ class OrderController extends Controller
      */
     public function destroy($id)
     {
-        $order = Order::findOrFail($id);
-        $order->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
     }
 }
