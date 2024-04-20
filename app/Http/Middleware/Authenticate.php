@@ -18,7 +18,7 @@ class Authenticate extends Middleware
         if (!$request->expectsJson()) {
             return response()->json([
                 'message' => 'Bạn chưa nhập thông tin đăng nhập'
-            ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_UNAUTHORIZED);
         }
     }
 }

@@ -35,10 +35,10 @@ class Cart extends Model
 
     public function getTotalPriceAttribute()
     {
-        return auth()->check() ? $this->products->reduce(function ($carry, $item) {
+        return $this->products->reduce(function ($carry, $item) {
             $item->load('product');
             $price = $item->product_quantity * ($item->product->sale ? $item->product->sale_price : $item->product->price);
             return $carry + $price;
-        }, 0) : 0;
+        }, 0);
     }
 }

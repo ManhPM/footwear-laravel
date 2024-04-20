@@ -8,24 +8,7 @@ use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('v1')->group(function () {
@@ -45,7 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('users/{id}', [UserController::class, 'update'])->middleware('permission:update-user', 'check.user.exist');
         Route::delete('users/{id}', [UserController::class, 'destroy'])->middleware('permission:delete-user', 'check.user.exist');
 
-        Route::get('categories', [CategoryController::class, 'index'])->middleware('permission:show-category');
         Route::post('categories', [CategoryController::class, 'store'])->middleware('permission:create-category');
         Route::put('categories/{id}', [CategoryController::class, 'update'])->middleware('permission:update-category', 'check.category.exist');
         Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('permission:delete-category', 'check.category.exist');
@@ -72,10 +54,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::prefix('v1')->group(function () {
     Route::get('categories/{id}', [CategoryController::class, 'getProductsByCategoryId'])->middleware('check.category.exist');
+    Route::get('categories', [CategoryController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
 
-    Route::post('/forgotpassword', [AuthController::class, 'forgotPassword']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/password/reset', [AuthController::class, 'resetPassword']);
 });
