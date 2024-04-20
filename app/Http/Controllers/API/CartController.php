@@ -38,21 +38,17 @@ class CartController extends Controller
 
     public function index()
     {
-        if (auth()->check()) {
-            $cart = $this->cart->getBy(auth()->user()->id);
-            $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
-            if ($cartProduct) {
-                foreach ($cartProduct as $item) {
-                    $item['total'] = $item->product->sale ? $item->product_quantity * $item->product->price * $item->product->sale
-                        : $item->product_quantity * $item->product->price;
-                }
-
-                return $this->sentSuccessResponse($cartProduct, '', Response::HTTP_OK);
-            } else {
-                return $this->sentSuccessResponse('', 'Giỏ hàng của bạn đang trống', Response::HTTP_OK);
+        $cart = $this->cart->getBy(auth()->user()->id);
+        $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
+        if ($cartProduct) {
+            foreach ($cartProduct as $item) {
+                $item['total'] = $item->product->sale ? $item->product_quantity * $item->product->price * $item->product->sale
+                    : $item->product_quantity * $item->product->price;
             }
+
+            return $this->sentSuccessResponse($cartProduct, '', Response::HTTP_OK);
         } else {
-            return $this->sentSuccessResponse('', 'Bạn chưa đăng nhập', Response::HTTP_UNAUTHORIZED);
+            return $this->sentSuccessResponse('', 'Giỏ hàng của bạn đang trống', Response::HTTP_OK);
         }
     }
 
