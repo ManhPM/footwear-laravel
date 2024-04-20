@@ -39,8 +39,8 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            'throttle:api',
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class . ':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
     ];
@@ -63,5 +63,13 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'check.product.exist' => \App\Http\Middleware\CheckExistProduct::class,
+        'check.coupon.exist' => \App\Http\Middleware\CheckExistCoupon::class,
+        'check.role.exist' => \App\Http\Middleware\CheckExistRole::class,
+        'check.category.exist' => \App\Http\Middleware\CheckExistCategory::class,
+        'check.order.exist' => \App\Http\Middleware\CheckExistOrder::class,
+        'check.user.exist' => \App\Http\Middleware\CheckExistUser::class,
+        'check.pending.order' => \App\Http\Middleware\ValidateCheckout::class,
+        'permission' => \App\Http\Middleware\Authorize::class,
     ];
 }
