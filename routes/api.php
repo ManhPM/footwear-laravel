@@ -8,6 +8,7 @@ use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\PaymentMethodController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\RoleController;
+use App\Http\Controllers\API\UploadController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VnpayController;
 use Illuminate\Support\Facades\Route;
@@ -72,6 +73,8 @@ Route::prefix('v1')->group(function () {
     Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+
+    Route::post('/upload', [UploadController::class, 'upload']);
 
     Route::get('/vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
 
