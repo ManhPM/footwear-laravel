@@ -77,7 +77,7 @@ class CartController extends Controller
                 $dataCreate['product_quantity'] = $request->product_quantity;
                 $dataCreate['product_price'] = $product->price;
                 $dataCreate['product_id'] = $product->id;
-                $cartProduct->create($dataCreate);
+                $this->cartProduct->create($dataCreate);
                 return $this->sentSuccessResponse('', 'Đã thêm vào giỏ hàng', Response::HTTP_OK);
             }
         } else {
@@ -108,7 +108,7 @@ class CartController extends Controller
         $cart = $this->cart->getCart(auth()->user()->id);
         $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
         $cartProduct->update(['product_quantity' => ($request->product_quantity)]);
-        return $this->sentSuccessResponse('', 'Cập nhật giỏ hàng', Response::HTTP_OK);
+        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
 
     /**

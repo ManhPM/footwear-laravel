@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->group(function () {
     Route::prefix('v1')->group(function () {
-        Route::post('cart-add', [CartController::class, 'store']);
-        Route::delete('cart-remove', [CartController::class, 'destroy']);
-        Route::put('cart-update', [CartController::class, 'update']);
+        Route::post('cart-add', [CartController::class, 'store'])->middleware('check.product.detail.exist');
+        Route::delete('cart-remove', [CartController::class, 'destroy'])->middleware('check.cart.product.exist');
+        Route::put('cart-update', [CartController::class, 'update'])->middleware('check.cart.product.exist');
         Route::get('cart', [CartController::class, 'index']);
         Route::post('checkout', [CartController::class, 'processCheckout'])->middleware(['check.pending.order']);
 

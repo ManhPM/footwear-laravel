@@ -11,7 +11,7 @@ class CheckExistCoupon
 {
     public function handle(Request $request, Closure $next)
     {
-        $item = Coupon::find($request->route('id'));
+        $item = Coupon::find($request->route('id'))->first();
         if (!$item) {
             return response()->json([
                 'message' => 'Mã giảm giá không tồn tại'

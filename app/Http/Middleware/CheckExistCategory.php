@@ -11,7 +11,7 @@ class CheckExistCategory
 {
     public function handle(Request $request, Closure $next)
     {
-        $item = Category::find($request->route('id'));
+        $item = Category::find($request->route('id'))->first();
         if (!$item) {
             return response()->json([
                 'message' => 'Loại hàng không tồn tại'
