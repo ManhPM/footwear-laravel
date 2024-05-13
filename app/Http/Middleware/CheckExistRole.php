@@ -14,7 +14,7 @@ class CheckExistRole
         $item = Role::find($request->route('id'));
         if (!$item) {
             return response()->json([
-                'message' => 'Sản phẩm không tồn tại'
+                'message' => 'Role không tồn tại'
             ], Response::HTTP_BAD_REQUEST);
         }
         return $next($request);

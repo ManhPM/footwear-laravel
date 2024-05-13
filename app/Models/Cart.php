@@ -22,7 +22,7 @@ class Cart extends Model
         return $this->whereUserId($userId)->first();
     }
 
-    public function updateOrCreate($userId)
+    public function getCart($userId)
     {
         $cart = $this->getBy($userId);
 

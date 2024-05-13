@@ -65,7 +65,7 @@ class CartController extends Controller
             if (!$product) {
                 return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_BAD_REQUEST);
             }
-            $cart = $this->cart->updateOrCreate(auth()->user()->id);
+            $cart = $this->cart->getCart(auth()->user()->id);
             $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
             if ($cartProduct) {
                 $quantity = $cartProduct->product_quantity;
@@ -105,7 +105,7 @@ class CartController extends Controller
     public function update(Request $request)
     {
         $product = $this->product->find($request->product_id);
-        $cart = $this->cart->updateOrCreate(auth()->user()->id);
+        $cart = $this->cart->getCart(auth()->user()->id);
         $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
         $cartProduct->update(['product_quantity' => ($request->product_quantity)]);
         return $this->sentSuccessResponse('', 'Cập nhật giỏ hàng', Response::HTTP_OK);
@@ -120,7 +120,7 @@ class CartController extends Controller
     public function destroy(Request $request)
     {
         $product = $this->product->findOrFail($request->product_id);
-        $cart = $this->cart->updateOrCreate(auth()->user()->id);
+        $cart = $this->cart->getCart(auth()->user()->id);
         $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
         $cartProduct->delete();
         return $this->sentSuccessResponse('', 'Đã xoá khỏi giỏ hàng', Response::HTTP_OK);
@@ -134,7 +134,7 @@ class CartController extends Controller
         $total = 0;
         $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
         foreach ($cartProduct as $item) {
-            $total += $item->product->sale ? $item->product_quantity * $item->product->price * $item->product->sale
+            $total += $item->product->sale ? $item->product_quantity * $item->product->price * (100 - $item->product->sale) / 100
                 : $item->product_quantity * $item->product->price;
         }
         $dataCreate['customer_name'] = auth()->user()->name;

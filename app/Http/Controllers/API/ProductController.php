@@ -47,11 +47,6 @@ class ProductController extends Controller
         $sizes = $request->sizes ? $request->sizes : [];
 
         $product = $this->product->create($dataCreate);
-        if (isset($dataCreate['image'])) {
-            $dataUpdate['image'] = $this->product->saveImage($request);
-
-            $product->images()->create(['url' => $dataUpdate['image']]);
-        }
         $product->categories()->attach($dataCreate['category_ids']);
 
         $sizeArray = [];
@@ -71,7 +66,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = $this->product->with(['details', 'images'])->findOrFail($id);
+        $product = $this->product->with('details')->findOrFail($id);
         return $this->sentSuccessResponse($product, '', Response::HTTP_OK);
     }
 
@@ -90,11 +85,6 @@ class ProductController extends Controller
 
         $sizes = $request->sizes ? $request->sizes : [];
 
-        if (isset($dataUpdate['image'])) {
-            $dataUpdate['image'] = $this->product->saveImage($request);
-            $product->images()->delete();
-            $product->images()->create(['url' => $dataUpdate['image']]);
-        }
         $product->categories()->sync($dataUpdate['category_ids'] ?? []);
 
         $sizeArray = [];
@@ -116,9 +106,6 @@ class ProductController extends Controller
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
-        $product->images()->delete();
-        $imageName = $product->images->count() > 0 ? $product->images->first()->url : '';
-        $this->product->deleteImage($imageName);
         $product->delete();
         return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
     }

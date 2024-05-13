@@ -29,10 +29,10 @@ class CreateUserRequest extends FormRequest
         return [
             'name' => 'required',
             'phone' => 'required|unique:users,phone|digits:10',
-            'gender' => 'required',
-            'image' => 'nullable|image|mimes:png,jpg,PNG,jpec',
+            'image' => 'nullable',
             'password' => 'required|min:6',
-            'email' => 'required|email|unique:users,email'
+            'email' => 'required|email|unique:users,email',
+            'role_ids'
         ];
     }
 

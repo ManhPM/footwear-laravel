@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Models\RoleHasPermission;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -33,14 +34,6 @@ class RoleDatabaseSeeder extends Seeder
         foreach ($roles as $role) {
             Role::updateOrCreate($role);
         }
-
-        $superAdmin = User::whereEmail('admin@gmail.com')->first();
-
-        if (!$superAdmin) {
-            $superAdmin = User::factory()->create(['email' => 'admin@gmail.com']);
-        }
-        $superAdmin->assignRole('super-admin');
-
 
         $permissions = [
             ['name' => 'create-user', 'display_name' => 'Create user', 'group' => 'user'],
@@ -74,6 +67,57 @@ class RoleDatabaseSeeder extends Seeder
 
         foreach ($permissions as $item) {
             Permission::updateOrCreate($item);
+        }
+
+        $role_has_permissions = [
+            ['permission_id' => '1', 'role_id' => '1'],
+            ['permission_id' => '2', 'role_id' => '1'],
+            ['permission_id' => '3', 'role_id' => '1'],
+            ['permission_id' => '4', 'role_id' => '1'],
+            ['permission_id' => '5', 'role_id' => '1'],
+            ['permission_id' => '6', 'role_id' => '1'],
+            ['permission_id' => '7', 'role_id' => '1'],
+            ['permission_id' => '8', 'role_id' => '1'],
+            ['permission_id' => '9', 'role_id' => '1'],
+            ['permission_id' => '10', 'role_id' => '1'],
+            ['permission_id' => '11', 'role_id' => '1'],
+            ['permission_id' => '12', 'role_id' => '1'],
+            ['permission_id' => '13', 'role_id' => '1'],
+            ['permission_id' => '14', 'role_id' => '1'],
+            ['permission_id' => '15', 'role_id' => '1'],
+            ['permission_id' => '16', 'role_id' => '1'],
+            ['permission_id' => '17', 'role_id' => '1'],
+            ['permission_id' => '18', 'role_id' => '1'],
+            ['permission_id' => '19', 'role_id' => '1'],
+            ['permission_id' => '20', 'role_id' => '1'],
+            ['permission_id' => '21', 'role_id' => '1'],
+            ['permission_id' => '22', 'role_id' => '1'],
+            ['permission_id' => '1', 'role_id' => '5'],
+            ['permission_id' => '2', 'role_id' => '5'],
+            ['permission_id' => '3', 'role_id' => '5'],
+            ['permission_id' => '4', 'role_id' => '5'],
+            ['permission_id' => '5', 'role_id' => '5'],
+            ['permission_id' => '6', 'role_id' => '5'],
+            ['permission_id' => '7', 'role_id' => '5'],
+            ['permission_id' => '8', 'role_id' => '5'],
+            ['permission_id' => '9', 'role_id' => '5'],
+            ['permission_id' => '10', 'role_id' => '5'],
+            ['permission_id' => '11', 'role_id' => '5'],
+            ['permission_id' => '12', 'role_id' => '5'],
+            ['permission_id' => '13', 'role_id' => '5'],
+            ['permission_id' => '14', 'role_id' => '5'],
+            ['permission_id' => '15', 'role_id' => '5'],
+            ['permission_id' => '16', 'role_id' => '5'],
+            ['permission_id' => '17', 'role_id' => '5'],
+            ['permission_id' => '18', 'role_id' => '5'],
+            ['permission_id' => '19', 'role_id' => '5'],
+            ['permission_id' => '20', 'role_id' => '5'],
+            ['permission_id' => '21', 'role_id' => '5'],
+            ['permission_id' => '22', 'role_id' => '5'],
+        ];
+
+        foreach ($role_has_permissions as $item) {
+            RoleHasPermission::updateOrCreate($item);
         }
     }
 }

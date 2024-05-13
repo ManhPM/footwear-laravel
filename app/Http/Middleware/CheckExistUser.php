@@ -14,7 +14,7 @@ class CheckExistUser
         $item = User::find($request->route('id'));
         if (!$item) {
             return response()->json([
-                'message' => 'Sản phẩm không tồn tại'
+                'message' => 'Người dùng không tồn tại'
             ], Response::HTTP_BAD_REQUEST);
         }
         return $next($request);

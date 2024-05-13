@@ -26,7 +26,6 @@ class UserFactory extends Factory
 
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
-            'gender' => 'male',
         ];
     }
 

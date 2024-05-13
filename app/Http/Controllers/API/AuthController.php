@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
@@ -11,9 +10,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -35,11 +36,18 @@ class AuthController extends Controller
             return response()->json(['message' => 'Thông tin đăng nhập chưa chính xác'], Response::HTTP_BAD_REQUEST);
         }
 
-        $token = $request->user()->createToken('access_token')->plainTextToken;
-        return response()->json([
-            'access_token' => $token,
-            'message' => 'Đăng nhập thành công'
-        ], Response::HTTP_OK);
+        $request = Request::create('oauth/token', 'POST', [
+            'grant_type' => 'password',
+            'client_id' => env("CLIENT_ID"),
+            'client_secret' => env("CLIENT_SECRET"),
+            'username' => $request->email,
+            'password' => $request->password,
+            'scope' => '',
+        ]);
+
+        $result = app()->handle($request);
+        $response = json_decode($result->getContent(), true);
+        return response()->json(['message' => 'Đăng nhập thành công', 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
     }
 
     /**
@@ -51,14 +59,7 @@ class AuthController extends Controller
     {
         $dataCreate = $request->all();
         $dataCreate['password'] = Hash::make($request->password);
-        $dataCreate['guard_name'] = 'sanctum';
-        if (isset($dataCreate['image'])) {
-            $dataCreate['image'] = $this->user->saveImage($request);
-        }
         $user = $this->user->create($dataCreate);
-        if (isset($dataCreate['image'])) {
-            $user->images()->create(['url' => $dataCreate['image']]);
-        }
         $user->roles()->attach(['5']);
 
         return $this->sentSuccessResponse('', 'Đăng ký thành công', Response::HTTP_OK);
@@ -66,18 +67,12 @@ class AuthController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
-
         $user = User::findOrFail(auth()->user()->id);
         $dataUpdate = $request->except('password');
         if ($request->password) {
             $dataUpdate['password'] = Hash::make($request->password);
         }
         $user->update($dataUpdate);
-        if (isset($dataUpdate['image'])) {
-            $dataUpdate['image'] = $this->user->saveImage($request);
-            $user->images()->delete();
-            $user->images()->create(['url' => $dataUpdate['image']]);
-        }
         return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
 
@@ -98,8 +93,7 @@ class AuthController extends Controller
     public function profile()
     {
         $profile = auth()->user();
-        $profileWithImage = $this->user->with('images')->find($profile->id);
-        return $this->sentSuccessResponse($profileWithImage, '', Response::HTTP_OK);
+        return $this->sentSuccessResponse($profile, '', Response::HTTP_OK);
     }
 
     public function forgotPassword(Request $request)
@@ -131,7 +125,7 @@ class AuthController extends Controller
             $message->subject('Lấy lại mật khẩu');
         });
 
-        return response()->json(['message' => 'Mã xác minh đã được gửi.', $htmlContent]);
+        return response()->json(['message' => 'Mã xác minh đã được gửi. Hãy kiểm tra hòm thư']);
     }
 
     public function resetPassword(Request $request)
@@ -139,8 +133,8 @@ class AuthController extends Controller
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => 'required|min:8',
-            'password_confirmation' => 'required|min:8',
+            'password' => 'required|min:6',
+            'password_confirmation' => 'required|min:6',
         ]);
 
         if ($request->password != $request->password_confirmation) {
@@ -156,7 +150,7 @@ class AuthController extends Controller
             ->first();
 
         if (!$reset) {
-            return response()->json(['message' => 'Token hoặc email không hợp lệ.'], 400);
+            return response()->json(['message' => 'Mã xác minh hoặc email không hợp lệ.'], Response::HTTP_BAD_REQUEST);
         }
 
         $user = User::where('email', $request->email)->first();
@@ -165,15 +159,15 @@ class AuthController extends Controller
 
         DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return response()->json(['message' => 'Mật khẩu đã được cập nhật.', $reset]);
+        return response()->json(['message' => 'Mật khẩu đã được cập nhật.']);
     }
 
     public function changePassword(Request $request)
     {
         $request->validate([
-            'old_password' => 'required|min:8',
-            'new_password' => 'required|min:8',
-            'repeat_password' => 'required|min:8',
+            'old_password' => 'required|min:6',
+            'new_password' => 'required|min:6',
+            'repeat_password' => 'required|min:6',
         ]);
 
         $currentUser = auth()->user();

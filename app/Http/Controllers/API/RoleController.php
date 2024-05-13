@@ -30,7 +30,7 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $dataCreate = $request->all();
-        $dataCreate['guard_name'] = 'sanctum';
+        $dataCreate['guard_name'] = 'web';
         $role = Role::create($dataCreate);
         $role->permissions()->attach($dataCreate['permission_ids']);
 

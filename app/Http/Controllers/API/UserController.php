@@ -44,14 +44,8 @@ class UserController extends Controller
     {
         $dataCreate = $request->all();
         $dataCreate['password'] = Hash::make($request->password);
-        $dataCreate['guard_name'] = 'sanctum';
-        if (isset($dataCreate['image'])) {
-            $dataCreate['image'] = $this->user->saveImage($request);
-        }
+        $dataCreate['guard_name'] = 'web';
         $user = $this->user->create($dataCreate);
-        if (isset($dataCreate['image'])) {
-            $user->images()->create(['url' => $dataCreate['image']]);
-        }
         $user->roles()->attach($dataCreate['role_ids'] ?? []);
 
         return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
@@ -79,11 +73,6 @@ class UserController extends Controller
             $dataUpdate['password'] = Hash::make($request->password);
         }
         $user->update($dataUpdate);
-        if (isset($dataUpdate['image'])) {
-            $dataUpdate['image'] = $this->user->saveImage($request);
-            $user->images()->delete();
-            $user->images()->create(['url' => $dataUpdate['image']]);
-        }
         $user->roles()->sync($dataUpdate['role_ids'] ?? []);
 
         return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
@@ -98,9 +87,6 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        $user->images()->delete();
-        $imageName = $user->images->count() > 0 ? $user->images->first()->url : '';
-        $this->user->deleteImage($imageName);
         $user->delete();
         return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
     }

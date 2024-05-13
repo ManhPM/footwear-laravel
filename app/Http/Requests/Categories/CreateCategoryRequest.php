@@ -27,7 +27,8 @@ class CreateCategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|unique:categories,name'
+            'name' => 'required|unique:categories,name',
+            'parent_id' => 'exists:categories,id',
         ];
     }
     protected function failedValidation(Validator $validator)

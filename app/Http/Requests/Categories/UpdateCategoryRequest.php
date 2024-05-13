@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Categories;
 
+use App\Models\Category;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Response;
@@ -30,8 +31,9 @@ class UpdateCategoryRequest extends FormRequest
         return [
             'name' => [
                 'required',
-                Rule::unique('categories', 'name')->ignore($this->category),
+                Rule::unique('categories', 'name')->ignore($this->route('id')),
             ],
+            'parent_id' => ['exists:categories,id', 'not_in:' . $this->route('id')],
         ];
     }
     protected function failedValidation(Validator $validator)

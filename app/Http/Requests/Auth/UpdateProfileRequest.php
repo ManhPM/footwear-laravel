@@ -31,17 +31,16 @@ class UpdateProfileRequest extends FormRequest
             'name' => 'required',
             'phone' => [
                 'required',
-                Rule::unique('users')->ignore($this->user)->where(function ($query) {
-                    return $query->where('phone', '!=', null);
-                }),
                 'digits:10',
+                Rule::unique('users')->ignore(auth()->user()->id)->where(function ($query) {
+                    return $query->where('phone', '!=', auth()->user()->phone);
+                }),
             ],
-            'gender' => 'required',
-            'image' => 'nullable|image|mimes:png,jpg,PNG,jpec',
+            'image' => 'nullable',
             'password' => 'nullable|min:6',
             'email' => [
                 'required',
-                Rule::unique('users', 'email')->ignore($this->user),
+                Rule::unique('users', 'email')->ignore(auth()->user()->id),
             ],
         ];
     }

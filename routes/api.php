@@ -10,7 +10,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::prefix('v1')->group(function () {
         Route::post('cart-add', [CartController::class, 'store']);
         Route::delete('cart-remove', [CartController::class, 'destroy']);
@@ -32,12 +32,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('categories/{id}', [CategoryController::class, 'update'])->middleware('permission:update-category', 'check.category.exist');
         Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('permission:delete-category', 'check.category.exist');
 
-        Route::get('products', [ProductController::class, 'index'])->middleware('permission:show-product');
         Route::post('products', [ProductController::class, 'store'])->middleware('permission:create-product');
         Route::put('products/{id}', [ProductController::class, 'update'])->middleware('permission:update-product', 'check.product.exist');
         Route::delete('products/{id}', [ProductController::class, 'destroy'])->middleware('permission:delete-product', 'check.product.exist');
 
-        Route::get('coupons', [CouponController::class, 'index'])->middleware('permission:show-coupon');
         Route::post('coupons', [CouponController::class, 'store'])->middleware('permission:create-coupon');
         Route::put('coupons/{id}', [CouponController::class, 'update'])->middleware('permission:update-coupon', 'check.coupon.exist');
         Route::delete('coupons/{id}', [CouponController::class, 'destroy'])->middleware('permission:delete-coupon', 'check.coupon.exist');
@@ -55,6 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('v1')->group(function () {
     Route::get('categories/{id}', [CategoryController::class, 'getProductsByCategoryId'])->middleware('check.category.exist');
     Route::get('categories', [CategoryController::class, 'index']);
+    Route::get('coupons', [CouponController::class, 'index']);
+    Route::get('products', [ProductController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);

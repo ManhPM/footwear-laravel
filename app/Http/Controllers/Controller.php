@@ -10,11 +10,17 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, ValidatesRequests;
 
-    public function sentSuccessResponse($data = '', $message = 'success', $status)
+    public function sentSuccessResponse($data, $message = 'success', $status)
     {
-        return \response()->json([
-            'data' => $data,
-            'message' => $message
-        ], $status);
+        if ($data === '') {
+            return \response()->json([
+                'message' => $message
+            ], $status);
+        } else {
+            return \response()->json([
+                'data' => $data,
+                'message' => $message
+            ], $status);
+        }
     }
 }

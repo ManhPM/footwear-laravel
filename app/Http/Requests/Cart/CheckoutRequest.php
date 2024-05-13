@@ -26,9 +26,7 @@ class CheckoutRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'note' => 'required'
-        ];
+        return [];
     }
 
     protected function failedValidation(Validator $validator)

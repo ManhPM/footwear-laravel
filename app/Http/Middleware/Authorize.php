@@ -5,10 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\Permission;
 use App\Models\RoleHasPermission;
 use Closure;
-use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 
 class Authorize
 {
@@ -22,13 +20,13 @@ class Authorize
 
         $permissionsName = [];
         foreach ($permissions as $item) {
-            $permission = Permission::where('id', $item->permission_id)->first();
-            if ($permission) {
-                $permissionsName[] = $permission->name;
+            $tempPermission = Permission::where('id', $item->permission_id)->first();
+            if ($tempPermission) {
+                $permissionsName[] = $tempPermission->name;
             }
         }
 
-        if (!in_array($permission->name, $permissionsName)) {
+        if (!in_array($permission, $permissionsName)) {
             return response()->json([
                 'message' => 'Bạn không có quyền sử dụng chức năng này'
             ], Response::HTTP_FORBIDDEN);

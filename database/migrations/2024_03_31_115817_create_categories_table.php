@@ -19,6 +19,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedBigInteger('parent_id')->nullable();
+            $table->double('status')->default(1);
             $table->timestamps();
         });
         Schema::create('category_product', function (Blueprint $table) {

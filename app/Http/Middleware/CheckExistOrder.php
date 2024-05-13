@@ -15,7 +15,7 @@ class CheckExistOrder
         if (!$item) {
             return response()->json([
                 $request,
-                'message' => 'Đơn không tồn tại'
+                'message' => 'Đơn hàng không tồn tại'
             ], Response::HTTP_BAD_REQUEST);
         }
         return $next($request);

@@ -11,6 +11,6 @@ class ProductDetail extends Model
     protected $fillable = [
         'size',
         'product_id',
-        'quantity'
+        'quantity',
     ];
 }

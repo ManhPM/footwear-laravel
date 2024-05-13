@@ -192,10 +192,9 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class
+        Laravel\Passport\PassportServiceProvider::class,
 
     ],
 
@@ -209,10 +208,4 @@ return [
     | the aliases are "lazy" loaded so they don't hinder performance.
     |
     */
-
-    'aliases' => Facade::defaultAliases()->merge([
-        'Image' => Intervention\Image\Facades\Image::class
-        // 'ExampleClass' => App\Example\ExampleClass::class,
-    ])->toArray(),
-
 ];

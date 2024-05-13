@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-// database/seeds/DatabaseSeeder.php
 class DatabaseSeeder extends Seeder
 {
     public function run()
@@ -16,7 +14,8 @@ class DatabaseSeeder extends Seeder
             UserDatabaseSeeder::class,
             CouponSeeder::class,
             ProductSeeder::class,
-            ProductDetailSeeder::class,
+            CartProductSeeder::class,
+            OrderSeeder::class
         ]);
     }
 }

@@ -31,18 +31,17 @@ class UpdateUserRequest extends FormRequest
             'name' => 'required',
             'phone' => [
                 'required',
-                Rule::unique('users')->ignore($this->user)->where(function ($query) {
-                    return $query->where('phone', '!=', null);
-                }),
+                Rule::unique('users', 'phone')->ignore($this->route('id')),
                 'digits:10',
             ],
-            'gender' => 'required',
-            'image' => 'nullable|image|mimes:png,jpg,PNG,jpec',
+            'image' => 'nullable',
+            // 'image' => 'nullable|image|mimes:png,jpg,PNG,jpec',
             'password' => 'nullable|min:6',
             'email' => [
                 'required',
-                Rule::unique('users', 'email')->ignore($this->user),
+                Rule::unique('users', 'email')->ignore($this->route('id')),
             ],
+            'role_ids'
         ];
     }
     protected function failedValidation(Validator $validator)

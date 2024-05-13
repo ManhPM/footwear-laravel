@@ -5,17 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Image extends Model
+class CategoryProduct extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'url',
-        'imageable_id',
-        'imageable_type'
+        'product_id',
+        'category_id',
     ];
 
-    public function imageable()
-    {
-        return $this->morphTo();
-    }
+    protected $table = 'category_product';
 }
