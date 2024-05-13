@@ -16,10 +16,10 @@ class OrderSeeder extends Seeder
     public function run()
     {
         $items = [
-            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '1500000'],
-            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '500000'],
-            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '1000000'],
-            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '3000000'],
+            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '1500000', 'status' => 'confirmed', 'payment_status' => 'unpaid', 'user_id' => 1, 'payment_method_id' => '1'],
+            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '500000', 'status' => 'confirmed', 'payment_status' => 'paid', 'user_id' => 1, 'payment_method_id' => '1'],
+            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '1000000', 'status' => 'confirmed', 'payment_status' => 'paid', 'user_id' => 1, 'payment_method_id' => '1'],
+            ['customer_name' => 'Khách mua tại cửa hàng', 'customer_email' => 'khachmuataicuahang@gmail.com', 'customer_phone' => '0111111111', 'customer_address' => 'Cửa hàng', 'total' => '3000000', 'status' => 'confirmed', 'payment_status' => 'paid', 'user_id' => 1, 'payment_method_id' => '1'],
         ];
 
         foreach ($items as $item) {

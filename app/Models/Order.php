@@ -19,6 +19,7 @@ class Order extends Model
         'note',
         'ship',
         'total',
+        'payment_status'
     ];
 
     public function products()
@@ -28,6 +29,11 @@ class Order extends Model
 
     public function coupon()
     {
-        return $this->hasOne(Coupon::class, 'coupon_id');
+        return $this->hasOne(Coupon::class, 'id');
+    }
+
+    public function payment_method()
+    {
+        return $this->hasOne(PaymentMethod::class, 'id');
     }
 }

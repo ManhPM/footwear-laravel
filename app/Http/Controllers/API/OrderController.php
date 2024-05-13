@@ -5,7 +5,6 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
-use App\Models\Product;
 use App\Models\ProductDetail;
 use App\Models\ProductOrder;
 use Illuminate\Http\Request;
@@ -52,7 +51,7 @@ class OrderController extends Controller
      */
     public function getDetailOrder($id)
     {
-        $order = $this->order->with('products')->find($id);
+        $order = $this->order->with(['products', 'payment_method', 'coupon'])->find($id);
         return $this->sentSuccessResponse($order, '', Response::HTTP_OK);
     }
 
@@ -90,6 +89,7 @@ class OrderController extends Controller
             }
 
             $order->status = 'confirmed';
+            $order->payment_status = 'paid';
             $order->save();
 
             return $this->sentSuccessResponse('', 'Nhận đơn thành công', Response::HTTP_OK);

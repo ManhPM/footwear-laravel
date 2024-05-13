@@ -45,7 +45,8 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Role::findOrFail($id);
+        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
     }
 
     /**

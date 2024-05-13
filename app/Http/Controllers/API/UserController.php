@@ -58,6 +58,12 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    public function show($id)
+    {
+        $item = User::findOrFail($id);
+        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+    }
+
     /**
      * Update the specified resource in storage.
      *

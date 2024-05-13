@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\CouponResource;
-use App\Models\Coupon;
+use App\Http\Resources\PaymentMethodResource;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class CouponController extends Controller
+class PaymentMethodController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,16 +16,16 @@ class CouponController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    protected $coupon;
+    protected $paymentMethod;
 
-    public function __construct(Coupon $coupon)
+    public function __construct(PaymentMethod $paymentMethod)
     {
-        $this->coupon = $coupon;
+        $this->paymentMethod = $paymentMethod;
     }
 
     public function index()
     {
-        return new CouponResource(Coupon::latest('id')->paginate(5));
+        return new PaymentMethodResource(PaymentMethod::latest('id')->paginate(5));
     }
 
     /**
@@ -37,7 +37,7 @@ class CouponController extends Controller
     public function store(Request $request)
     {
         $dataCreate = $request->all();
-        Coupon::create($dataCreate);
+        PaymentMethod::create($dataCreate);
 
         return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
     }
@@ -50,7 +50,7 @@ class CouponController extends Controller
      */
     public function show($id)
     {
-        $item = Coupon::findOrFail($id);
+        $item = PaymentMethod::findOrFail($id);
         return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
     }
 
@@ -63,9 +63,9 @@ class CouponController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $coupon = Coupon::findOrFail($id);
+        $paymentMethod = PaymentMethod::findOrFail($id);
         $dataUpdate = $request->all();
-        $coupon->update($dataUpdate);
+        $paymentMethod->update($dataUpdate);
 
         return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
@@ -78,8 +78,8 @@ class CouponController extends Controller
      */
     public function destroy($id)
     {
-        $coupon = Coupon::findOrFail($id);
-        $coupon->delete();
+        $paymentMethod = PaymentMethod::findOrFail($id);
+        $paymentMethod->delete();
         return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
     }
 }
