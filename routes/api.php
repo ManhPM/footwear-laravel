@@ -21,19 +21,19 @@ Route::middleware('auth:api')->group(function () {
         Route::get('cart', [CartController::class, 'index']);
         Route::post('checkout', [CartController::class, 'processCheckout'])->middleware(['check.pending.order']);
 
-        Route::get('roles/{id}', [RoleController::class, 'show']);
+        Route::get('roles/{id}', [RoleController::class, 'show'])->middleware('check.role.exist');
         Route::get('roles', [RoleController::class, 'index'])->middleware('permission:show-role');
         Route::post('roles', [RoleController::class, 'store'])->middleware('permission:create-role');
         Route::put('roles/{id}', [RoleController::class, 'update'])->middleware('permission:update-role', 'check.role.exist');
         Route::delete('roles/{id}', [RoleController::class, 'destroy'])->middleware('permission:delete-role', 'check.role.exist');
 
-        Route::get('users/{id}', [UserController::class, 'show']);
+        Route::get('users/{id}', [UserController::class, 'show'])->middleware('check.user.exist');
         Route::get('users', [UserController::class, 'index'])->middleware('permission:show-user');
         Route::post('users', [UserController::class, 'store'])->middleware('permission:create-user');
         Route::put('users/{id}', [UserController::class, 'update'])->middleware('permission:update-user', 'check.user.exist');
         Route::delete('users/{id}', [UserController::class, 'destroy'])->middleware('permission:delete-user', 'check.user.exist');
 
-        Route::get('categories/detail/{id}', [CategoryController::class, 'show']);
+        Route::get('categories/detail/{id}', [CategoryController::class, 'show'])->middleware('check.category.exist');
         Route::post('categories', [CategoryController::class, 'store'])->middleware('permission:create-category');
         Route::put('categories/{id}', [CategoryController::class, 'update'])->middleware('permission:update-category', 'check.category.exist');
         Route::delete('categories/{id}', [CategoryController::class, 'destroy'])->middleware('permission:delete-category', 'check.category.exist');
@@ -42,16 +42,16 @@ Route::middleware('auth:api')->group(function () {
         Route::put('products/{id}', [ProductController::class, 'update'])->middleware('permission:update-product', 'check.product.exist');
         Route::delete('products/{id}', [ProductController::class, 'destroy'])->middleware('permission:delete-product', 'check.product.exist');
 
-        Route::get('coupons/{id}', [CouponController::class, 'show']);
+        Route::get('coupons/{id}', [CouponController::class, 'show'])->middleware('check.coupon.exist');
         Route::post('coupons', [CouponController::class, 'store'])->middleware('permission:create-coupon');
         Route::put('coupons/{id}', [CouponController::class, 'update'])->middleware('permission:update-coupon', 'check.coupon.exist');
         Route::delete('coupons/{id}', [CouponController::class, 'destroy'])->middleware('permission:delete-coupon', 'check.coupon.exist');
 
         Route::get('payment_methods', [PaymentMethodController::class, 'index']);
-        Route::get('payment_methods/{id}', [PaymentMethodController::class, 'show']);
+        Route::get('payment_methods/{id}', [PaymentMethodController::class, 'show'])->middleware('check.payment.method.exist');
         Route::post('payment_methods', [PaymentMethodController::class, 'store']);
-        Route::put('payment_methods/{id}', [PaymentMethodController::class, 'update']);
-        Route::delete('payment_methods/{id}', [PaymentMethodController::class, 'destroy']);
+        Route::put('payment_methods/{id}', [PaymentMethodController::class, 'update'])->middleware('check.payment.method.exist');
+        Route::delete('payment_methods/{id}', [PaymentMethodController::class, 'destroy'])->middleware('check.payment.method.exist');
 
         Route::get('/orders/confirm/{id}', [OrderController::class, 'confirmOrder'])->middleware('permission:confirm-order', 'check.order.exist');
         Route::get('/orders/cancel/{id}', [OrderController::class, 'cancelOrder'])->middleware('permission:cancel-order', 'check.order.exist');

@@ -11,7 +11,7 @@ class CheckExistUser
 {
     public function handle(Request $request, Closure $next)
     {
-        $item = User::find($request->route('id'))->first();
+        $item = User::find($request->route('id'));
         if (!$item) {
             return response()->json([
                 'message' => 'Người dùng không tồn tại'

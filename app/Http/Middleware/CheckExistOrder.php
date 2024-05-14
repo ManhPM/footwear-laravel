@@ -11,7 +11,7 @@ class CheckExistOrder
 {
     public function handle(Request $request, Closure $next)
     {
-        $item = Order::find($request->route('id'))->first();
+        $item = Order::find($request->route('id'));
         if (!$item) {
             return response()->json([
                 $request,

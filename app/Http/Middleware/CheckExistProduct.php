@@ -11,7 +11,7 @@ class CheckExistProduct
 {
     public function handle(Request $request, Closure $next)
     {
-        $item = Product::find($request->route('id'))->first();
+        $item = Product::find($request->route('id'));
         if (!$item) {
             return response()->json([
                 'message' => 'Sản phẩm không tồn tại'
