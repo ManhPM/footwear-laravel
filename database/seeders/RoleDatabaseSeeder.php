@@ -63,6 +63,8 @@ class RoleDatabaseSeeder extends Seeder
 
             ['name' => 'cancel-order', 'display_name' => 'Cancel order', 'group' => 'orders'],
             ['name' => 'confirm-order', 'display_name' => 'Confirm order', 'group' => 'orders'],
+            ['name' => 'show-order', 'display_name' => 'Show order', 'group' => 'orders'],
+            ['name' => 'show-order-detail', 'display_name' => 'Show order detail', 'group' => 'orders'],
         ];
 
         foreach ($permissions as $item) {
@@ -92,6 +94,8 @@ class RoleDatabaseSeeder extends Seeder
             ['permission_id' => '20', 'role_id' => '1'],
             ['permission_id' => '21', 'role_id' => '1'],
             ['permission_id' => '22', 'role_id' => '1'],
+            ['permission_id' => '23', 'role_id' => '1'],
+            ['permission_id' => '24', 'role_id' => '1'],
             ['permission_id' => '1', 'role_id' => '5'],
             ['permission_id' => '2', 'role_id' => '5'],
             ['permission_id' => '3', 'role_id' => '5'],
@@ -114,6 +118,8 @@ class RoleDatabaseSeeder extends Seeder
             ['permission_id' => '20', 'role_id' => '5'],
             ['permission_id' => '21', 'role_id' => '5'],
             ['permission_id' => '22', 'role_id' => '5'],
+            ['permission_id' => '23', 'role_id' => '5'],
+            ['permission_id' => '24', 'role_id' => '5'],
         ];
 
         foreach ($role_has_permissions as $item) {

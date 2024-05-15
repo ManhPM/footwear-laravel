@@ -60,7 +60,8 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Category::findOrFail($id);
+        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
     }
 
     /**

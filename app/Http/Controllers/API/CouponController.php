@@ -50,7 +50,8 @@ class CouponController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Coupon::findOrFail($id);
+        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
     }
 
     /**

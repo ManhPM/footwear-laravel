@@ -50,6 +50,27 @@ class AuthController extends Controller
         return response()->json(['message' => 'Đăng nhập thành công', 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
     }
 
+    public function refreshToken(Request $request)
+    {
+        $refreshToken = $request->header('refresh_token');
+
+        if (!$refreshToken) {
+            return response()->json(['message' => 'Không có refresh token'], Response::HTTP_NOT_FOUND);
+        }
+
+        $request = Request::create('oauth/token', 'POST', [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $refreshToken,
+            'client_id' => env("CLIENT_ID"),
+            'client_secret' => env("CLIENT_SECRET"),
+            'scope' => '',
+        ]);
+
+        $result = app()->handle($request);
+        $response = json_decode($result->getContent(), true);
+        return response()->json(['message' => 'Tạo mới refresh token thành công', 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
+    }
+
     /**
      * Get the authenticated User.
      *

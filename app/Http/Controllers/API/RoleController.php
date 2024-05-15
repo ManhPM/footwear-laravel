@@ -45,7 +45,8 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Role::findOrFail($id);
+        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
     }
 
     /**
@@ -61,7 +62,7 @@ class RoleController extends Controller
         $dataUpdate = $request->all();
         $role->update($dataUpdate);
         if (isset($dataUpdate['permission_ids'])) {
-            $role->permissions()->attach($dataUpdate['permission_ids']);
+            $role->permissions()->sync($dataUpdate['permission_ids']);
         }
 
         return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);

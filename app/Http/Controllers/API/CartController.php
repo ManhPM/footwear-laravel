@@ -63,7 +63,7 @@ class CartController extends Controller
         if ($request->product_size) {
             $product = $this->product->find($request->product_id);
             if (!$product) {
-                return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_BAD_REQUEST);
+                return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_NOT_FOUND);
             }
             $cart = $this->cart->getCart(auth()->user()->id);
             $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
@@ -77,7 +77,7 @@ class CartController extends Controller
                 $dataCreate['product_quantity'] = $request->product_quantity;
                 $dataCreate['product_price'] = $product->price;
                 $dataCreate['product_id'] = $product->id;
-                $cartProduct->create($dataCreate);
+                $this->cartProduct->create($dataCreate);
                 return $this->sentSuccessResponse('', 'Đã thêm vào giỏ hàng', Response::HTTP_OK);
             }
         } else {
@@ -108,7 +108,7 @@ class CartController extends Controller
         $cart = $this->cart->getCart(auth()->user()->id);
         $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
         $cartProduct->update(['product_quantity' => ($request->product_quantity)]);
-        return $this->sentSuccessResponse('', 'Cập nhật giỏ hàng', Response::HTTP_OK);
+        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
 
     /**
@@ -143,17 +143,15 @@ class CartController extends Controller
         $dataCreate['customer_address'] = auth()->user()->address;
         $dataCreate['user_id'] = auth()->user()->id;
         $dataCreate['status'] = 'pending';
+        $dataCreate['payment_status'] = 'unpaid';
         $dataCreate['total'] = $total;
         $dataCreate['ship'] = 0;
-        $order = $this->order->create($dataCreate);
         if (isset($dataCreate['code'])) {
             $coupon =  $this->coupon->where('name', $dataCreate['code'])->first();
-            if ($coupon->count() > 0) {
-                $coupon->users()->attach(auth()->user()->id, ['value' => $coupon->value, 'order_id' => $order->id]);
-            }
-            $couponTotal = $total - ($total * $coupon->value / 100);
-            $order->update(['total' => $couponTotal]);
+            $dataCreate['coupon_id'] = $coupon->id;
+            $dataCreate['total'] = $dataCreate['total'] * (100 - $coupon->value) / 100;
         }
+        $order = $this->order->create($dataCreate);
         foreach ($cartProduct as $item) {
             $data['product_size'] = $item->product_size;
             $data['product_quantity'] = $item->product_quantity;
@@ -164,6 +162,6 @@ class CartController extends Controller
         }
         $cart->products()->delete();
 
-        return $this->sentSuccessResponse($cartProduct, 'Đặt hàng thành công', Response::HTTP_OK);
+        return $this->sentSuccessResponse($order, 'Đặt hàng thành công', Response::HTTP_OK);
     }
 }

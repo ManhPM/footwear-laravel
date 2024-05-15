@@ -21,19 +21,19 @@ class ValidateCheckout
      */
     public function handle(Request $request, Closure $next)
     {
-        $item = Order::where('status', 'pending')->get();
-        if ($item->count() > 0) {
+        $item = Order::where('status', 'pending')->first();
+        if ($item) {
             return response()->json([
                 'data' => $item,
                 'message' => 'Bạn đang có đơn chưa xác nhận không thể đặt thêm'
             ], Response::HTTP_BAD_REQUEST);
         }
         if ($request->code) {
-            $coupon =  Coupon::where('name', $request['code'])->get();
-            if ($coupon->count() == 0) {
+            $coupon =  Coupon::where('name', $request['code'])->first();
+            if (!$coupon) {
                 return response()->json([
                     'message' => 'Mã giảm giá không tồn tại'
-                ], Response::HTTP_BAD_REQUEST);
+                ], Response::HTTP_NOT_FOUND);
             }
         }
         return $next($request);
