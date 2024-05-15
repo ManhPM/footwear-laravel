@@ -25,7 +25,12 @@ class CouponController extends Controller
 
     public function index()
     {
-        return new CouponResource(Coupon::latest('id')->paginate(5));
+        try {
+            return new CouponResource(Coupon::latest('id')->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -36,10 +41,16 @@ class CouponController extends Controller
      */
     public function store(Request $request)
     {
-        $dataCreate = $request->all();
-        Coupon::create($dataCreate);
+        try {
+            $dataCreate = $request->all();
+            Coupon::create($dataCreate);
 
-        return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
+            $message = $this->getMessage('CREATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -50,8 +61,13 @@ class CouponController extends Controller
      */
     public function show($id)
     {
-        $item = Coupon::findOrFail($id);
-        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        try {
+            $item = Coupon::findOrFail($id);
+            return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -63,11 +79,17 @@ class CouponController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $coupon = Coupon::findOrFail($id);
-        $dataUpdate = $request->all();
-        $coupon->update($dataUpdate);
+        try {
+            $coupon = Coupon::findOrFail($id);
+            $dataUpdate = $request->all();
+            $coupon->update($dataUpdate);
 
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -78,8 +100,14 @@ class CouponController extends Controller
      */
     public function destroy($id)
     {
-        $coupon = Coupon::findOrFail($id);
-        $coupon->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
+        try {
+            $coupon = Coupon::findOrFail($id);
+            $coupon->delete();
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 }

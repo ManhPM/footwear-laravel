@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
 use App\Models\Role;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -28,47 +30,59 @@ class AuthController extends Controller
         $this->role = $role;
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        try {
+            $credentials = $request->only('email', 'password');
 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Thông tin đăng nhập chưa chính xác'], Response::HTTP_BAD_REQUEST);
+            if (!Auth::attempt($credentials)) {
+                return response()->json(['message' => 'Thông tin đăng nhập chưa chính xác'], Response::HTTP_BAD_REQUEST);
+            }
+
+            $request = Request::create('oauth/token', 'POST', [
+                'grant_type' => 'password',
+                'client_id' => env("CLIENT_ID"),
+                'client_secret' => env("CLIENT_SECRET"),
+                'username' => $request->email,
+                'password' => $request->password,
+                'scope' => '',
+            ]);
+
+            $result = app()->handle($request);
+            $response = json_decode($result->getContent(), true);
+            $message = $this->getMessage('LOGIN_SUCCESS');
+            return response()->json(['message' => $message, 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-
-        $request = Request::create('oauth/token', 'POST', [
-            'grant_type' => 'password',
-            'client_id' => env("CLIENT_ID"),
-            'client_secret' => env("CLIENT_SECRET"),
-            'username' => $request->email,
-            'password' => $request->password,
-            'scope' => '',
-        ]);
-
-        $result = app()->handle($request);
-        $response = json_decode($result->getContent(), true);
-        return response()->json(['message' => 'Đăng nhập thành công', 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
     }
 
     public function refreshToken(Request $request)
     {
-        $refreshToken = $request->header('refresh_token');
+        try {
+            $refreshToken = $request->header('refresh_token');
 
-        if (!$refreshToken) {
-            return response()->json(['message' => 'Không có refresh token'], Response::HTTP_NOT_FOUND);
+            if (!$refreshToken) {
+                return response()->json(['message' => 'Không có refresh token'], Response::HTTP_NOT_FOUND);
+            }
+
+            $request = Request::create('oauth/token', 'POST', [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refreshToken,
+                'client_id' => env("CLIENT_ID"),
+                'client_secret' => env("CLIENT_SECRET"),
+                'scope' => '',
+            ]);
+
+            $result = app()->handle($request);
+            $response = json_decode($result->getContent(), true);
+            $message = $this->getMessage('REFRESH_TOKEN_SUCCESS');
+            return response()->json(['message' => $message, 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-
-        $request = Request::create('oauth/token', 'POST', [
-            'grant_type' => 'refresh_token',
-            'refresh_token' => $refreshToken,
-            'client_id' => env("CLIENT_ID"),
-            'client_secret' => env("CLIENT_SECRET"),
-            'scope' => '',
-        ]);
-
-        $result = app()->handle($request);
-        $response = json_decode($result->getContent(), true);
-        return response()->json(['message' => 'Tạo mới refresh token thành công', 'access_token' => $response['access_token'], 'refresh_token' => $response['refresh_token'], 'expires_in' => $response['expires_in']], Response::HTTP_OK);
     }
 
     /**
@@ -78,23 +92,34 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {
-        $dataCreate = $request->all();
-        $dataCreate['password'] = Hash::make($request->password);
-        $user = $this->user->create($dataCreate);
-        $user->roles()->attach(['5']);
-
-        return $this->sentSuccessResponse('', 'Đăng ký thành công', Response::HTTP_OK);
+        try {
+            $dataCreate = $request->all();
+            $dataCreate['password'] = Hash::make($request->password);
+            $user = $this->user->create($dataCreate);
+            $user->roles()->attach(['5']);
+            $message = $this->getMessage('REGISTER_SUCCESS');
+            return $this->sentSuccessResponse('', $message, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     public function update(UpdateProfileRequest $request)
     {
-        $user = User::findOrFail(auth()->user()->id);
-        $dataUpdate = $request->except('password');
-        if ($request->password) {
-            $dataUpdate['password'] = Hash::make($request->password);
+        try {
+            $user = User::findOrFail(auth()->user()->id);
+            $dataUpdate = $request->except('password');
+            if ($request->password) {
+                $dataUpdate['password'] = Hash::make($request->password);
+            }
+            $user->update($dataUpdate);
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return $this->sentSuccessResponse('', $message, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-        $user->update($dataUpdate);
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
 
     /**
@@ -102,112 +127,142 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function logout()
+    public function logout(Request $request)
     {
-        $user = auth()->user();
-        $user->tokens->each(function ($token, $key) {
-            $token->delete();
-        });
-        return $this->sentSuccessResponse('', 'Đăng xuất thành công', Response::HTTP_OK);
+        try {
+            $user = auth()->user();
+            $user->tokens->each(function ($token, $key) {
+                $token->delete();
+            });
+            $message = $this->getMessage('LOGOUT_SUCCESS');
+            return $this->sentSuccessResponse('', $message, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
-    public function profile()
+    public function profile(Request $request)
     {
-        $profile = auth()->user();
-        return $this->sentSuccessResponse($profile, '', Response::HTTP_OK);
+        try {
+            $profile = auth()->user();
+            return $this->sentSuccessResponse($profile, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     public function forgotPassword(Request $request)
     {
-        $request->validate(['email' => 'required|email|exists:users,email']);
+        try {
+            $request->validate(['email' => 'required|email|exists:users,email']);
 
-        $currentTimeSub15Minutes = Carbon::now()->subMinutes(15);
-        $reset = DB::table('password_resets')
-            ->where('email', $request->email)
-            ->where('created_at', '>', $currentTimeSub15Minutes)
-            ->first();
+            $currentTimeSub15Minutes = Carbon::now()->subMinutes(15);
+            $reset = DB::table('password_resets')
+                ->where('email', $request->email)
+                ->where('created_at', '>', $currentTimeSub15Minutes)
+                ->first();
 
-        if ($reset) {
-            return response()->json(['message' => 'Mã xác minh đã được gửi, hãy chờ mã xác minh cũ hết hạn'], Response::HTTP_BAD_REQUEST);
+            if ($reset) {
+                $message = $this->getMessage('SMS_SEND_ERROR');
+                return response()->json(['message' => $message], Response::HTTP_BAD_REQUEST);
+            }
+
+            $token = mt_rand(100000, 999999);
+
+            DB::table('password_resets')->insert([
+                'email' => $request->email,
+                'token' => $token,
+                'created_at' => Carbon::now()
+            ]);
+
+            $htmlContent = $this->createHtmlContent($token);
+
+            Mail::html($htmlContent, function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Lấy lại mật khẩu');
+            });
+            $message = $this->getMessage('SMS_SEND_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-
-        $token = mt_rand(100000, 999999);
-
-        DB::table('password_resets')->insert([
-            'email' => $request->email,
-            'token' => $token,
-            'created_at' => Carbon::now()
-        ]);
-
-        $htmlContent = $this->createHtmlContent($token);
-
-        Mail::html($htmlContent, function ($message) use ($request) {
-            $message->to($request->email);
-            $message->subject('Lấy lại mật khẩu');
-        });
-
-        return response()->json(['message' => 'Mã xác minh đã được gửi. Hãy kiểm tra hòm thư']);
     }
 
     public function resetPassword(Request $request)
     {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-            'password_confirmation' => 'required|min:6',
-        ]);
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:6',
+                'password_confirmation' => 'required|min:6',
+            ]);
+            if ($request->password != $request->password_confirmation) {
+                $message = $this->getMessage('INPUT_PASSWORD_ERROR3');
+                return $this->sentSuccessResponse('', $message, Response::HTTP_BAD_REQUEST);
+            }
 
-        if ($request->password != $request->password_confirmation) {
-            return $this->sentSuccessResponse('', 'Mật khẩu lặp lại không khớp', Response::HTTP_BAD_REQUEST);
+            $currentTimeSub15Minutes = Carbon::now()->subMinutes(15);
+
+            $reset = DB::table('password_resets')
+                ->where('token', $request->token)
+                ->where('email', $request->email)
+                ->where('created_at', '>', $currentTimeSub15Minutes)
+                ->first();
+
+            if (!$reset) {
+                $message = $this->getMessage('VERIFY_ERROR');
+                return response()->json(['message' => $message], Response::HTTP_BAD_REQUEST);
+            }
+
+            $user = User::where('email', $request->email)->first();
+            $user->password = Hash::make($request->password);
+            $user->save();
+
+            DB::table('password_resets')->where('email', $request->email)->delete();
+
+            $message = $this->getMessage('FORGOT_PASSWORD_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-
-        $currentTimeSub15Minutes = Carbon::now()->subMinutes(15);
-
-        $reset = DB::table('password_resets')
-            ->where('token', $request->token)
-            ->where('email', $request->email)
-            ->where('created_at', '>', $currentTimeSub15Minutes)
-            ->first();
-
-        if (!$reset) {
-            return response()->json(['message' => 'Mã xác minh hoặc email không hợp lệ.'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $user = User::where('email', $request->email)->first();
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        DB::table('password_resets')->where('email', $request->email)->delete();
-
-        return response()->json(['message' => 'Mật khẩu đã được cập nhật.']);
     }
 
     public function changePassword(Request $request)
     {
-        $request->validate([
-            'old_password' => 'required|min:6',
-            'new_password' => 'required|min:6',
-            'repeat_password' => 'required|min:6',
-        ]);
+        try {
+            $request->validate([
+                'old_password' => 'required|min:6',
+                'new_password' => 'required|min:6',
+                'repeat_password' => 'required|min:6',
+            ]);
 
-        $currentUser = auth()->user();
+            $currentUser = auth()->user();
 
-        if (!Hash::check($request->old_password, $currentUser->password)) {
-            return $this->sentSuccessResponse('', 'Mật khẩu cũ không chính xác', Response::HTTP_BAD_REQUEST);
+            if (!Hash::check($request->old_password, $currentUser->password)) {
+                return $this->sentSuccessResponse('', 'Mật khẩu cũ không chính xác', Response::HTTP_BAD_REQUEST);
+            }
+            if ($request->old_password != $request->new_password) {
+                return $this->sentSuccessResponse('', 'Mật khẩu lặp lại không khớp', Response::HTTP_BAD_REQUEST);
+            }
+            if ($request->old_password == $request->new_password) {
+                return $this->sentSuccessResponse('', 'Mật khẩu mới không được trùng với mật khẩu cũ', Response::HTTP_BAD_REQUEST);
+            }
+
+            $user = User::where('email', $request->email)->first();
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            $message = $this->getMessage('CHANGE_PASSWORD_SUCCESS');
+            return response()->json(['message' => $message]);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-        if ($request->old_password != $request->new_password) {
-            return $this->sentSuccessResponse('', 'Mật khẩu lặp lại không khớp', Response::HTTP_BAD_REQUEST);
-        }
-        if ($request->old_password == $request->new_password) {
-            return $this->sentSuccessResponse('', 'Mật khẩu mới không được trùng với mật khẩu cũ', Response::HTTP_BAD_REQUEST);
-        }
-
-        $user = User::where('email', $request->email)->first();
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return response()->json(['message' => 'Mật khẩu đã được cập nhật.']);
     }
 
     public function createHtmlContent($token)

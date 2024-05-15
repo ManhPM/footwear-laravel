@@ -32,7 +32,12 @@ class ProductController extends Controller
 
     public function index()
     {
-        return new ProductResource(Product::latest('id')->paginate(8));
+        try {
+            return new ProductResource(Product::latest('id')->paginate(8));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -43,19 +48,25 @@ class ProductController extends Controller
      */
     public function store(CreateProductRequest $request)
     {
-        $dataCreate = $request->except('sizes');
-        $sizes = $request->sizes ? $request->sizes : [];
+        try {
+            $dataCreate = $request->except('sizes');
+            $sizes = $request->sizes ? $request->sizes : [];
 
-        $product = $this->product->create($dataCreate);
-        $product->categories()->attach($dataCreate['category_ids']);
+            $product = $this->product->create($dataCreate);
+            $product->categories()->attach($dataCreate['category_ids']);
 
-        $sizeArray = [];
+            $sizeArray = [];
 
-        foreach ($sizes as $size) {
-            $sizeArray[] = ['size' => $size['size'], 'quantity' => $size['quantity'], 'product_id' => $product->id];
+            foreach ($sizes as $size) {
+                $sizeArray[] = ['size' => $size['size'], 'quantity' => $size['quantity'], 'product_id' => $product->id];
+            }
+            $this->productDetail->insert($sizeArray);
+            $message = $this->getMessage('CREATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-        $this->productDetail->insert($sizeArray);
-        return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
     }
 
     /**
@@ -66,8 +77,13 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = $this->product->with('details')->findOrFail($id);
-        return $this->sentSuccessResponse($product, '', Response::HTTP_OK);
+        try {
+            $product = $this->product->with('details')->findOrFail($id);
+            return $this->sentSuccessResponse($product, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -79,22 +95,28 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, $id)
     {
-        $dataUpdate = $request->except('sizes');
-        $product = $this->product->findOrFail($id);
-        $product->update($dataUpdate);
+        try {
+            $dataUpdate = $request->except('sizes');
+            $product = $this->product->findOrFail($id);
+            $product->update($dataUpdate);
 
-        $sizes = $request->sizes ? $request->sizes : [];
+            $sizes = $request->sizes ? $request->sizes : [];
 
-        $product->categories()->sync($dataUpdate['category_ids'] ?? []);
+            $product->categories()->sync($dataUpdate['category_ids'] ?? []);
 
-        $sizeArray = [];
-        foreach ($sizes as $size) {
-            $sizeArray[] = ['size' => $size['size'], 'quantity' => $size['quantity'], 'product_id' => $product->id];
+            $sizeArray = [];
+            foreach ($sizes as $size) {
+                $sizeArray[] = ['size' => $size['size'], 'quantity' => $size['quantity'], 'product_id' => $product->id];
+            }
+            $product->details()->delete();
+            $this->productDetail->insert($sizeArray);
+
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-        $product->details()->delete();
-        $this->productDetail->insert($sizeArray);
-
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
     }
 
     /**
@@ -105,8 +127,14 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 }

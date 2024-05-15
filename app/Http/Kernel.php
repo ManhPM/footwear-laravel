@@ -73,6 +73,7 @@ class Kernel extends HttpKernel
         'check.cart.product.exist' => \App\Http\Middleware\CheckExistCartProduct::class,
         'check.payment.method.exist' => \App\Http\Middleware\CheckExistPaymentMethod::class,
         'check.pending.order' => \App\Http\Middleware\ValidateCheckout::class,
+        'language' => \App\Http\Middleware\LanguageMiddleware::class,
         'permission' => \App\Http\Middleware\Authorize::class,
     ];
 }

@@ -25,7 +25,12 @@ class UserController extends Controller
 
     public function index()
     {
-        return new UserResource(User::latest('id')->paginate(5));
+        try {
+            return new UserResource(User::latest('id')->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -42,13 +47,19 @@ class UserController extends Controller
      */
     public function store(CreateUserRequest $request)
     {
-        $dataCreate = $request->all();
-        $dataCreate['password'] = Hash::make($request->password);
-        $dataCreate['guard_name'] = 'web';
-        $user = $this->user->create($dataCreate);
-        $user->roles()->attach($dataCreate['role_ids'] ?? []);
+        try {
+            $dataCreate = $request->all();
+            $dataCreate['password'] = Hash::make($request->password);
+            $dataCreate['guard_name'] = 'web';
+            $user = $this->user->create($dataCreate);
+            $user->roles()->attach($dataCreate['role_ids'] ?? []);
 
-        return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
+            $message = $this->getMessage('CREATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -60,8 +71,13 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $item = User::findOrFail($id);
-        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        try {
+            $item = User::findOrFail($id);
+            return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -73,15 +89,21 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, $id)
     {
-        $user = User::findOrFail($id)->load('roles');
-        $dataUpdate = $request->except('password');
-        if ($request->password) {
-            $dataUpdate['password'] = Hash::make($request->password);
-        }
-        $user->update($dataUpdate);
-        $user->roles()->sync($dataUpdate['role_ids'] ?? []);
+        try {
+            $user = User::findOrFail($id)->load('roles');
+            $dataUpdate = $request->except('password');
+            if ($request->password) {
+                $dataUpdate['password'] = Hash::make($request->password);
+            }
+            $user->update($dataUpdate);
+            $user->roles()->sync($dataUpdate['role_ids'] ?? []);
 
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -92,8 +114,14 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-        $user->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 }

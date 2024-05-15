@@ -38,17 +38,23 @@ class CartController extends Controller
 
     public function index()
     {
-        $cart = $this->cart->getBy(auth()->user()->id);
-        $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
-        if ($cartProduct) {
-            foreach ($cartProduct as $item) {
-                $item['total'] = $item->product->sale ? $item->product_quantity * $item->product->price * $item->product->sale
-                    : $item->product_quantity * $item->product->price;
-            }
+        try {
+            $cart = $this->cart->getBy(auth()->user()->id);
+            $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
+            if ($cartProduct) {
+                foreach ($cartProduct as $item) {
+                    $item['total'] = $item->product->sale ? $item->product_quantity * $item->product->price * $item->product->sale
+                        : $item->product_quantity * $item->product->price;
+                }
 
-            return $this->sentSuccessResponse($cartProduct, '', Response::HTTP_OK);
-        } else {
-            return $this->sentSuccessResponse('', 'Giỏ hàng của bạn đang trống', Response::HTTP_OK);
+                return $this->sentSuccessResponse($cartProduct, '', Response::HTTP_OK);
+            } else {
+                $message = $this->getMessage('CHECKOUT_ERROR2');
+                return $this->sentSuccessResponse('', $message, Response::HTTP_OK);
+            }
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
     }
 
@@ -60,28 +66,38 @@ class CartController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->product_size) {
-            $product = $this->product->find($request->product_id);
-            if (!$product) {
-                return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_NOT_FOUND);
-            }
-            $cart = $this->cart->getCart(auth()->user()->id);
-            $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
-            if ($cartProduct) {
-                $quantity = $cartProduct->product_quantity;
-                $cartProduct->update(['product_quantity' => ($quantity + $request->product_quantity)]);
-                return $this->sentSuccessResponse('', 'Đã thêm vào giỏ hàng', Response::HTTP_OK);
+        try {
+            if ($request->product_size) {
+                $product = $this->product->find($request->product_id);
+                if (!$product) {
+                    $message = $this->getMessage('PRODUCT_NOTFOUND');
+                    return response()->json(['message' => $message], 404);
+                }
+                $cart = $this->cart->getCart(auth()->user()->id);
+                $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
+                if ($cartProduct) {
+                    $quantity = $cartProduct->product_quantity;
+                    $cartProduct->update(['product_quantity' => ($quantity + $request->product_quantity)]);
+
+                    $message = $this->getMessage('ADD_TO_CART_SUCCESS');
+                    return response()->json(['message' => $message], 200);
+                } else {
+                    $dataCreate['cart_id'] = $cart->id;
+                    $dataCreate['product_size'] = $request->product_size;
+                    $dataCreate['product_quantity'] = $request->product_quantity;
+                    $dataCreate['product_price'] = $product->price;
+                    $dataCreate['product_id'] = $product->id;
+                    $this->cartProduct->create($dataCreate);
+                    $message = $this->getMessage('ADD_TO_CART_SUCCESS');
+                    return response()->json(['message' => $message], 200);
+                }
             } else {
-                $dataCreate['cart_id'] = $cart->id;
-                $dataCreate['product_size'] = $request->product_size;
-                $dataCreate['product_quantity'] = $request->product_quantity;
-                $dataCreate['product_price'] = $product->price;
-                $dataCreate['product_id'] = $product->id;
-                $this->cartProduct->create($dataCreate);
-                return $this->sentSuccessResponse('', 'Đã thêm vào giỏ hàng', Response::HTTP_OK);
+                $message = $this->getMessage('ADD_TO_CART_ERROR');
+                return response()->json(['message' => $message], 400);
             }
-        } else {
-            return $this->sentSuccessResponse('', 'Bạn chưa chọn size', Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
     }
 
@@ -104,11 +120,18 @@ class CartController extends Controller
      */
     public function update(Request $request)
     {
-        $product = $this->product->find($request->product_id);
-        $cart = $this->cart->getCart(auth()->user()->id);
-        $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
-        $cartProduct->update(['product_quantity' => ($request->product_quantity)]);
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
+        try {
+            $product = $this->product->find($request->product_id);
+            $cart = $this->cart->getCart(auth()->user()->id);
+            $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
+            $cartProduct->update(['product_quantity' => ($request->product_quantity)]);
+
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -119,49 +142,60 @@ class CartController extends Controller
      */
     public function destroy(Request $request)
     {
-        $product = $this->product->findOrFail($request->product_id);
-        $cart = $this->cart->getCart(auth()->user()->id);
-        $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
-        $cartProduct->delete();
-        return $this->sentSuccessResponse('', 'Đã xoá khỏi giỏ hàng', Response::HTTP_OK);
+        try {
+            $product = $this->product->findOrFail($request->product_id);
+            $cart = $this->cart->getCart(auth()->user()->id);
+            $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);
+            $cartProduct->delete();
+
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     public function processCheckout(CheckoutRequest $request)
     {
-
-        $dataCreate = $request->all();
-        $cart = $this->cart->getBy(auth()->user()->id);
-        $total = 0;
-        $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
-        foreach ($cartProduct as $item) {
-            $total += $item->product->sale ? $item->product_quantity * $item->product->price * (100 - $item->product->sale) / 100
-                : $item->product_quantity * $item->product->price;
+        try {
+            $dataCreate = $request->all();
+            $cart = $this->cart->getBy(auth()->user()->id);
+            $total = 0;
+            $cartProduct = $this->cartProduct->with(['product'])->where('cart_id', $cart->id)->get();
+            foreach ($cartProduct as $item) {
+                $total += $item->product->sale ? $item->product_quantity * $item->product->price * (100 - $item->product->sale) / 100
+                    : $item->product_quantity * $item->product->price;
+            }
+            $dataCreate['customer_name'] = auth()->user()->name;
+            $dataCreate['customer_email'] = auth()->user()->email;
+            $dataCreate['customer_phone'] = auth()->user()->phone;
+            $dataCreate['customer_address'] = auth()->user()->address;
+            $dataCreate['user_id'] = auth()->user()->id;
+            $dataCreate['status'] = 'pending';
+            $dataCreate['payment_status'] = 'unpaid';
+            $dataCreate['total'] = $total;
+            $dataCreate['ship'] = 0;
+            if (isset($dataCreate['code'])) {
+                $coupon =  $this->coupon->where('name', $dataCreate['code'])->first();
+                $dataCreate['coupon_id'] = $coupon->id;
+                $dataCreate['total'] = $dataCreate['total'] * (100 - $coupon->value) / 100;
+            }
+            $order = $this->order->create($dataCreate);
+            foreach ($cartProduct as $item) {
+                $data['product_size'] = $item->product_size;
+                $data['product_quantity'] = $item->product_quantity;
+                $data['product_price'] = $item->product->price;
+                $data['product_id'] = $item->product->id;
+                $data['order_id'] = $order->id;
+                ProductOrder::create($data);
+            }
+            $cart->products()->delete();
+            $message = $this->getMessage('CHECKOUT_SUCCESS');
+            return $this->sentSuccessResponse($order, $message, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
-        $dataCreate['customer_name'] = auth()->user()->name;
-        $dataCreate['customer_email'] = auth()->user()->email;
-        $dataCreate['customer_phone'] = auth()->user()->phone;
-        $dataCreate['customer_address'] = auth()->user()->address;
-        $dataCreate['user_id'] = auth()->user()->id;
-        $dataCreate['status'] = 'pending';
-        $dataCreate['payment_status'] = 'unpaid';
-        $dataCreate['total'] = $total;
-        $dataCreate['ship'] = 0;
-        if (isset($dataCreate['code'])) {
-            $coupon =  $this->coupon->where('name', $dataCreate['code'])->first();
-            $dataCreate['coupon_id'] = $coupon->id;
-            $dataCreate['total'] = $dataCreate['total'] * (100 - $coupon->value) / 100;
-        }
-        $order = $this->order->create($dataCreate);
-        foreach ($cartProduct as $item) {
-            $data['product_size'] = $item->product_size;
-            $data['product_quantity'] = $item->product_quantity;
-            $data['product_price'] = $item->product->price;
-            $data['product_id'] = $item->product->id;
-            $data['order_id'] = $order->id;
-            ProductOrder::create($data);
-        }
-        $cart->products()->delete();
-
-        return $this->sentSuccessResponse($order, 'Đặt hàng thành công', Response::HTTP_OK);
     }
 }

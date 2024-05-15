@@ -29,12 +29,22 @@ class OrderController extends Controller
 
     public function index()
     {
-        return new OrderResource(Order::latest('id')->paginate(5));
+        try {
+            return new OrderResource(Order::latest('id')->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     public function getAllOrderUser()
     {
-        return new OrderResource(Order::latest('id')->where('user_id', auth()->user()->id)->paginate(5));
+        try {
+            return new OrderResource(Order::latest('id')->where('user_id', auth()->user()->id)->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -43,10 +53,6 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        return $this->sentSuccessResponse('', '', Response::HTTP_OK);
-    }
 
     /**
      * Display the specified resource.
@@ -56,8 +62,13 @@ class OrderController extends Controller
      */
     public function getDetailOrder($id)
     {
-        $order = $this->order->with(['products', 'payment_method', 'coupon'])->find($id);
-        return $this->sentSuccessResponse($order, '', Response::HTTP_OK);
+        try {
+            $order = $this->order->with(['products', 'payment_method', 'coupon'])->find($id);
+            return $this->sentSuccessResponse($order, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -69,53 +80,70 @@ class OrderController extends Controller
      */
     public function confirmOrder($id)
     {
-        $order = $this->order->with('products')->find($id);
-        if (!$order) {
-            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_NOT_FOUND);
-        }
-        if ($order->status != 'pending') {
-            return $this->sentSuccessResponse('', 'Đơn hàng đã được xác nhận rồi', Response::HTTP_BAD_REQUEST);
-        }
-
-        $productOrder = $this->productOrder->where('order_id', $order->id)->get();
-
-        $isEnough = 1;
-        foreach ($productOrder as $item) {
-            $productDetail = ProductDetail::where('product_id', $item->product_id)->where('size', $item->product_size)->first();
-            if ($productDetail->quantity < $item->product_quantity) {
-                $isEnough = 0;
+        try {
+            $order = $this->order->with('products')->find($id);
+            if (!$order) {
+                $message = $this->getMessage('INVOICE_NOTFOUND');
+                return response()->json(['message' => $message], 404);
             }
-        }
+            if ($order->status != 'pending') {
+                $message = $this->getMessage('CONFIRM_ERROR');
+                return response()->json(['message' => $message], 400);
+            }
 
-        if ($isEnough) {
+            $productOrder = $this->productOrder->where('order_id', $order->id)->get();
+
+            $isEnough = 1;
             foreach ($productOrder as $item) {
                 $productDetail = ProductDetail::where('product_id', $item->product_id)->where('size', $item->product_size)->first();
-                $productDetail->decrement('quantity', $item->product_quantity);
+                if ($productDetail->quantity < $item->product_quantity) {
+                    $isEnough = 0;
+                }
             }
 
-            $order->status = 'confirmed';
-            $order->payment_status = 'paid';
-            $order->save();
+            if ($isEnough) {
+                foreach ($productOrder as $item) {
+                    $productDetail = ProductDetail::where('product_id', $item->product_id)->where('size', $item->product_size)->first();
+                    $productDetail->decrement('quantity', $item->product_quantity);
+                }
 
-            return $this->sentSuccessResponse('', 'Nhận đơn thành công', Response::HTTP_OK);
-        } else {
-            return $this->sentSuccessResponse('', 'Hàng trong kho không đủ, không thể nhận đơn', Response::HTTP_BAD_REQUEST);
+                $order->status = 'confirmed';
+                $order->payment_status = 'paid';
+                $order->save();
+
+                $message = $this->getMessage('CONFIRM_SUCCESS');
+                return response()->json(['message' => $message], 200);
+            } else {
+                $message = $this->getMessage('INPUT_QUANTITY_ERROR3');
+                return response()->json(['message' => $message], 400);
+            }
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
         }
     }
 
     public function cancelOrder($id)
     {
-        $order = $this->order->with('products')->find($id);
-        if (!$order) {
-            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_NOT_FOUND);
-        }
-        if ($order->status != 'pending') {
-            return $this->sentSuccessResponse('', 'Đơn hàng không thể huỷ', Response::HTTP_BAD_REQUEST);
-        }
-        $order->status = 'canceled';
-        $order->save();
+        try {
+            $order = $this->order->with('products')->find($id);
+            if (!$order) {
+                $message = $this->getMessage('INVOICE_NOTFOUND');
+                return response()->json(['message' => $message], 404);
+            }
+            if ($order->status != 'pending') {
+                $message = $this->getMessage('CANCEL_INVOICE_ERROR');
+                return response()->json(['message' => $message], 400);
+            }
+            $order->status = 'canceled';
+            $order->save();
 
-        return $this->sentSuccessResponse('', 'Huỷ đơn thành công', Response::HTTP_OK);
+            $message = $this->getMessage('CANCEL_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**

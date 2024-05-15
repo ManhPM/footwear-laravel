@@ -1,48 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Services;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Http\Request;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Session;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
-class Controller extends BaseController
+class MessageService
 {
-    use AuthorizesRequests, ValidatesRequests;
-
-    public function sentSuccessResponse($data, $message = 'success', $status)
-    {
-        if ($data === '') {
-            return \response()->json([
-                'message' => $message
-            ], $status);
-        } else {
-            return \response()->json([
-                'data' => $data,
-                'message' => $message
-            ], $status);
-        }
-    }
-
-    public function changeLanguage(Request $request)
-    {
-        $language = $request->lang;
-        $cookie = Cookie::make('website_language', $language, 72000);
-        $message = $this->getMessage('CHANGE_LANGUAGE_SUCCESS');
-        return response()->json(['message' => $message . $language])->withCookie($cookie);
-    }
-
-    public function test()
-    {
-        $message = $this->getMessage('MESSAGE_NOTFOUND');
-        return response()->json(['message' => $message], 200);
-    }
-
     public function numberToLetter($num)
     {
         return chr(64 + $num);

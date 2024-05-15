@@ -25,7 +25,12 @@ class PaymentMethodController extends Controller
 
     public function index()
     {
-        return new PaymentMethodResource(PaymentMethod::latest('id')->paginate(5));
+        try {
+            return new PaymentMethodResource(PaymentMethod::latest('id')->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -36,10 +41,16 @@ class PaymentMethodController extends Controller
      */
     public function store(Request $request)
     {
-        $dataCreate = $request->all();
-        PaymentMethod::create($dataCreate);
+        try {
+            $dataCreate = $request->all();
+            PaymentMethod::create($dataCreate);
 
-        return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
+            $message = $this->getMessage('CREATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -50,8 +61,13 @@ class PaymentMethodController extends Controller
      */
     public function show($id)
     {
-        $item = PaymentMethod::findOrFail($id);
-        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        try {
+            $item = PaymentMethod::findOrFail($id);
+            return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -63,11 +79,17 @@ class PaymentMethodController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $paymentMethod = PaymentMethod::findOrFail($id);
-        $dataUpdate = $request->all();
-        $paymentMethod->update($dataUpdate);
+        try {
+            $paymentMethod = PaymentMethod::findOrFail($id);
+            $dataUpdate = $request->all();
+            $paymentMethod->update($dataUpdate);
 
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -78,8 +100,14 @@ class PaymentMethodController extends Controller
      */
     public function destroy($id)
     {
-        $paymentMethod = PaymentMethod::findOrFail($id);
-        $paymentMethod->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
+        try {
+            $paymentMethod = PaymentMethod::findOrFail($id);
+            $paymentMethod->delete();
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 }

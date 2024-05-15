@@ -29,13 +29,23 @@ class CategoryController extends Controller
     }
     public function index()
     {
-        return new CategoryResource(Category::latest('id')->with('childrens')->with('parent')->paginate(5));
+        try {
+            return new CategoryResource(Category::latest('id')->with('childrens')->with('parent')->paginate(5));
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     public function getProductsByCategoryId($categoryId)
     {
-        $products = $this->product->getBy($categoryId);
-        return $this->sentSuccessResponse($products, '', Response::HTTP_OK);
+        try {
+            $products = $this->product->getBy($categoryId);
+            return $this->sentSuccessResponse($products, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -46,10 +56,15 @@ class CategoryController extends Controller
      */
     public function store(CreateCategoryRequest $request)
     {
-        $dataCreate = $request->all();
-        Category::create($dataCreate);
-
-        return $this->sentSuccessResponse('', 'Tạo mới thành công', Response::HTTP_OK);
+        try {
+            $dataCreate = $request->all();
+            Category::create($dataCreate);
+            $message = $this->getMessage('CREATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -60,8 +75,13 @@ class CategoryController extends Controller
      */
     public function show($id)
     {
-        $item = Category::findOrFail($id);
-        return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        try {
+            $item = Category::findOrFail($id);
+            return $this->sentSuccessResponse($item, '', Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -73,11 +93,17 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, $id)
     {
-        $category = Category::findOrFail($id);
-        $dataUpdate = $request->all();
-        $category->update($dataUpdate);
+        try {
+            $category = Category::findOrFail($id);
+            $dataUpdate = $request->all();
+            $category->update($dataUpdate);
 
-        return $this->sentSuccessResponse('', 'Cập nhật thành công', Response::HTTP_OK);
+            $message = $this->getMessage('UPDATE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 
     /**
@@ -88,8 +114,14 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $category = Category::findOrFail($id);
-        $category->delete();
-        return $this->sentSuccessResponse('', 'Xoá thành công', Response::HTTP_OK);
+        try {
+            $category = Category::findOrFail($id);
+            $category->delete();
+            $message = $this->getMessage('DELETE_SUCCESS');
+            return response()->json(['message' => $message], 200);
+        } catch (\Throwable $th) {
+            $message = $this->getMessage('INTERNAL_SERVER_ERROR');
+            return response()->json(['message' => $message], 500);
+        }
     }
 }

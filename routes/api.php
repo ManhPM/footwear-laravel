@@ -14,7 +14,7 @@ use App\Http\Controllers\API\VnpayController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['language', 'auth:api'])->group(function () {
     Route::prefix('v1')->group(function () {
         Route::post('cart_add', [CartController::class, 'store'])->middleware('check.product.detail.exist');
         Route::put('cart_remove', [CartController::class, 'destroy'])->middleware('check.cart.product.exist');
@@ -66,23 +66,25 @@ Route::middleware('auth:api')->group(function () {
         Route::put('profile', [AuthController::class, 'update']);
     });
 });
-Route::prefix('v1')->group(function () {
-    Route::get('categories/{id}', [CategoryController::class, 'getProductsByCategoryId'])->middleware('check.category.exist');
-    Route::get('categories', [CategoryController::class, 'index']);
-    Route::get('coupons', [CouponController::class, 'index']);
-    Route::get('products', [ProductController::class, 'index']);
-    Route::get('payment_methods', [PaymentMethodController::class, 'index']);
-    Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
-    Route::get('refresh_token', [AuthController::class, 'refreshToken']);
+Route::middleware('language')->group(function () {
+    Route::prefix('v1')->group(function () {
+        Route::get('categories/{id}', [CategoryController::class, 'getProductsByCategoryId'])->middleware('check.category.exist');
+        Route::get('categories', [CategoryController::class, 'index']);
+        Route::get('coupons', [CouponController::class, 'index']);
+        Route::get('products', [ProductController::class, 'index']);
+        Route::get('payment_methods', [PaymentMethodController::class, 'index']);
+        Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
+        Route::post('login', [AuthController::class, 'login']);
+        Route::post('register', [AuthController::class, 'register']);
+        Route::get('refresh_token', [AuthController::class, 'refreshToken']);
 
-    Route::post('upload', [UploadController::class, 'upload']);
-    Route::get('change_language', [Controller::class, 'changeLanguage']);
-    Route::get('test', [Controller::class, 'test']);
+        Route::post('upload', [UploadController::class, 'upload']);
+        Route::get('change_language', [Controller::class, 'changeLanguage']);
+        Route::get('test', [Controller::class, 'test']);
 
-    Route::get('vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
+        Route::get('vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
 
-    Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
-    Route::post('reset_password', [AuthController::class, 'resetPassword']);
+        Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
+        Route::post('reset_password', [AuthController::class, 'resetPassword']);
+    });
 });
