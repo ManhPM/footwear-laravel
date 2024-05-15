@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->group(function () {
     Route::prefix('v1')->group(function () {
         Route::post('cart_add', [CartController::class, 'store'])->middleware('check.product.detail.exist');
-        Route::delete('cart_remove', [CartController::class, 'destroy'])->middleware('check.cart.product.exist');
+        Route::put('cart_remove', [CartController::class, 'destroy'])->middleware('check.cart.product.exist');
         Route::put('cart_update', [CartController::class, 'update'])->middleware('check.cart.product.exist');
         Route::get('cart', [CartController::class, 'index']);
         Route::post('checkout', [CartController::class, 'processCheckout'])->middleware(['check.pending.order']);
@@ -83,6 +83,6 @@ Route::prefix('v1')->group(function () {
 
     Route::get('vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
 
-    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('password/reset', [AuthController::class, 'resetPassword']);
+    Route::post('forgot_password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset_password', [AuthController::class, 'resetPassword']);
 });

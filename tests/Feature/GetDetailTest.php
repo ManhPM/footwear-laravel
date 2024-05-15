@@ -85,4 +85,22 @@ class GetDetailTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    /** @test */
+    public function user_can_confirm_order()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->access_token,
+        ])->get($this->apiPrefix . 'orders/confirm/1');
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function user_can_cancel_order()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->access_token,
+        ])->get($this->apiPrefix . 'orders/cancel/2');
+        $response->assertStatus(200);
+    }
 }
