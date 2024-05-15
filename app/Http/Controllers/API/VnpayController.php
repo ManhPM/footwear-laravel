@@ -17,7 +17,7 @@ class VnpayController extends Controller
         $order = Order::where('id', $request->order_id)->where('user_id', auth()->user()->id)->first();
 
         if (!$order) {
-            return response()->json(['message' => 'Hoá đơn không tồn tại'], 400);
+            return response()->json(['message' => 'Hoá đơn không tồn tại'], 404);
         }
 
         if ($order->payment_status == 'paid' || $order->payment_method_id == 2) {
@@ -97,7 +97,7 @@ class VnpayController extends Controller
         $order = Order::find($order_id);
 
         if (!$order) {
-            return response()->json(['message' => 'Hoá đơn không tồn tại'], 400);
+            return response()->json(['message' => 'Hoá đơn không tồn tại'], 404);
         }
 
         $order->payment_status = 'paid';

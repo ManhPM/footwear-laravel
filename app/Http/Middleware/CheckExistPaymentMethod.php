@@ -16,7 +16,7 @@ class CheckExistPaymentMethod
         if (!$item) {
             return response()->json([
                 'message' => 'Phương thức thanh toán không tồn tại'
-            ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_NOT_FOUND);
         }
         return $next($request);
     }

@@ -17,7 +17,7 @@ class CheckExistCartProduct
         if (!$item) {
             return response()->json([
                 'message' => 'Sản phẩm không tồn tại trong giỏ hàng'
-            ], Response::HTTP_BAD_REQUEST);
+            ], Response::HTTP_NOT_FOUND);
         }
         return $next($request);
     }

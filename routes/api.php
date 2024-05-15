@@ -11,6 +11,7 @@ use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\UploadController;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\VnpayController;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->group(function () {
@@ -47,22 +48,22 @@ Route::middleware('auth:api')->group(function () {
         Route::put('coupons/{id}', [CouponController::class, 'update'])->middleware('permission:update-coupon', 'check.coupon.exist');
         Route::delete('coupons/{id}', [CouponController::class, 'destroy'])->middleware('permission:delete-coupon', 'check.coupon.exist');
 
-        Route::get('payment_methods', [PaymentMethodController::class, 'index']);
         Route::get('payment_methods/{id}', [PaymentMethodController::class, 'show'])->middleware('check.payment.method.exist');
         Route::post('payment_methods', [PaymentMethodController::class, 'store']);
         Route::put('payment_methods/{id}', [PaymentMethodController::class, 'update'])->middleware('check.payment.method.exist');
         Route::delete('payment_methods/{id}', [PaymentMethodController::class, 'destroy'])->middleware('check.payment.method.exist');
 
-        Route::get('/orders/confirm/{id}', [OrderController::class, 'confirmOrder'])->middleware('permission:confirm-order', 'check.order.exist');
-        Route::get('/orders/cancel/{id}', [OrderController::class, 'cancelOrder'])->middleware('permission:cancel-order', 'check.order.exist');
-        Route::get('/orders', [OrderController::class, 'index'])->middleware('permission:show-order');
-        Route::get('/orders/detail/{id}', [OrderController::class, 'getDetailOrder'])->middleware('permission:show-order-detail', 'check.order.exist');
+        Route::get('orders/confirm/{id}', [OrderController::class, 'confirmOrder'])->middleware('permission:confirm-order', 'check.order.exist');
+        Route::get('orders/cancel/{id}', [OrderController::class, 'cancelOrder'])->middleware('permission:cancel-order', 'check.order.exist');
+        Route::get('orders', [OrderController::class, 'index'])->middleware('permission:show-order');
+        Route::get('orders/user', [OrderController::class, 'getAllOrderUser']);
+        Route::get('orders/detail/{id}', [OrderController::class, 'getDetailOrder'])->middleware('permission:show-order-detail', 'check.order.exist');
 
-        Route::post('/vnpay/create_payment_url', [VnpayController::class, 'createPaymentUrl']);
+        Route::post('vnpay/create_payment_url', [VnpayController::class, 'createPaymentUrl']);
 
-        Route::get('/logout', [AuthController::class, 'logout']);
-        Route::get('/profile', [AuthController::class, 'profile']);
-        Route::put('/profile', [AuthController::class, 'update']);
+        Route::get('logout', [AuthController::class, 'logout']);
+        Route::get('profile', [AuthController::class, 'profile']);
+        Route::put('profile', [AuthController::class, 'update']);
     });
 });
 Route::prefix('v1')->group(function () {
@@ -70,14 +71,18 @@ Route::prefix('v1')->group(function () {
     Route::get('categories', [CategoryController::class, 'index']);
     Route::get('coupons', [CouponController::class, 'index']);
     Route::get('products', [ProductController::class, 'index']);
+    Route::get('payment_methods', [PaymentMethodController::class, 'index']);
     Route::get('products/{id}', [ProductController::class, 'show'])->middleware('check.product.exist');
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+    Route::get('refresh_token', [AuthController::class, 'refreshToken']);
 
-    Route::post('/upload', [UploadController::class, 'upload']);
+    Route::post('upload', [UploadController::class, 'upload']);
+    Route::get('change_language', [Controller::class, 'changeLanguage']);
+    Route::get('test', [Controller::class, 'test']);
 
-    Route::get('/vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
+    Route::get('vnpay/vnpay_return', [VnpayController::class, 'vnpayReturn']);
 
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('password/reset', [AuthController::class, 'resetPassword']);
 });

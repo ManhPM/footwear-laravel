@@ -32,6 +32,11 @@ class OrderController extends Controller
         return new OrderResource(Order::latest('id')->paginate(5));
     }
 
+    public function getAllOrderUser()
+    {
+        return new OrderResource(Order::latest('id')->where('user_id', auth()->user()->id)->paginate(5));
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -66,7 +71,7 @@ class OrderController extends Controller
     {
         $order = $this->order->with('products')->find($id);
         if (!$order) {
-            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_BAD_REQUEST);
+            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_NOT_FOUND);
         }
         if ($order->status != 'pending') {
             return $this->sentSuccessResponse('', 'Đơn hàng đã được xác nhận rồi', Response::HTTP_BAD_REQUEST);
@@ -102,7 +107,7 @@ class OrderController extends Controller
     {
         $order = $this->order->with('products')->find($id);
         if (!$order) {
-            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_BAD_REQUEST);
+            return $this->sentSuccessResponse('', 'Đơn hàng không tồn tại', Response::HTTP_NOT_FOUND);
         }
         if ($order->status != 'pending') {
             return $this->sentSuccessResponse('', 'Đơn hàng không thể huỷ', Response::HTTP_BAD_REQUEST);

@@ -63,7 +63,7 @@ class CartController extends Controller
         if ($request->product_size) {
             $product = $this->product->find($request->product_id);
             if (!$product) {
-                return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_BAD_REQUEST);
+                return $this->sentSuccessResponse('', 'Sản phẩm không tồn tại', Response::HTTP_NOT_FOUND);
             }
             $cart = $this->cart->getCart(auth()->user()->id);
             $cartProduct = $this->cartProduct->getBy($cart->id, $product->id, $request->product_size);

@@ -33,7 +33,7 @@ class ValidateCheckout
             if (!$coupon) {
                 return response()->json([
                     'message' => 'Mã giảm giá không tồn tại'
-                ], Response::HTTP_BAD_REQUEST);
+                ], Response::HTTP_NOT_FOUND);
             }
         }
         return $next($request);
